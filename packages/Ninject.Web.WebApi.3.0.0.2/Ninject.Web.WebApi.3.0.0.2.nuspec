@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Ninject.Web.WebApi</id>
+    <version>3.0.0.2</version>
+    <authors>Remo Gloor</authors>
+    <owners>Remo Gloor</owners>
+    <licenseUrl>https://github.com/ninject/ninject.web.webapi/raw/master/LICENSE.txt</licenseUrl>
+    <projectUrl>http://www.ninject.org/</projectUrl>
+    <iconUrl>https://github.com/ninject/ninject/raw/master/logos/Ninject-Logo32.png</iconUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Extension for Ninject providing integration with ASP.NET MVC WebAPI</description>
+    <summary>Extension for Ninject providing integration with ASP.NET MVC WebAPI</summary>
+    <tags>Ninject ioc di web mvc api</tags>
+    <dependencies>
+      <dependency id="Ninject" version="[3.0.0.0, 3.1.0.0)" />
+      <dependency id="Ninject.Web.Common" version="[3.0.0.0, 3.1.0.0)" />
+      <dependency id="AspNetWebApi" version="4.0.20126.16343" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Microsoft.Web.Infrastructure" targetFramework=".NETFramework4.0" />
+    </frameworkAssemblies>
+  </metadata>
+</package>
