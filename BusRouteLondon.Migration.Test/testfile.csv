@@ -1,0 +1,3 @@
+﻿Route,Run,Sequence,Stop_Code_LBSL,Bus_Stop_Code,Naptan_Atco,Stop_Name,Location_Easting,Location_Northing,Heading,Virtual_Bus_Stop
+1,1,1,14456,53369,490000235Z,NEW OXFORD STREET,529956,181417,75,0
+1,1,2,29844,54468,490010131WB,MUSEUM STREET,530237,181523,53,0
