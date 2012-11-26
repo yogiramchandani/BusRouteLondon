@@ -94,6 +94,10 @@
       <Project>{4E1C51F0-1093-42A0-9EFB-35C193454D46}</Project>
       <Name>BusRouteLondon.Web</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Common.Test\Common.Test.csproj">
+      <Project>{8B78E014-F6BB-41F2-AD70-4A14C36C499D}</Project>
+      <Name>Common.Test</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
