@@ -71,7 +71,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BusRouteLondon\BusRouteLondon.Web.csproj">
+    <ProjectReference Include="..\BusRouteLondon.Web\BusRouteLondon.Web.csproj">
       <Project>{4E1C51F0-1093-42A0-9EFB-35C193454D46}</Project>
       <Name>BusRouteLondon.Web</Name>
     </ProjectReference>

@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using BusRouteLondon.Controllers;
+using BusRouteLondon.Web.Controllers;
 using Xunit;
 
-namespace BusRouteLondon.Tests.Controllers
+namespace BusRouteLondon.Web.Tests.Controllers
 {
     public class ValuesControllerTest
     {

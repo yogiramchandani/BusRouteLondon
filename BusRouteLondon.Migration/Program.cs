@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
+using BusRouteLondon.Web;
 using Raven.Client.Document;
 
 namespace BusRouteLondon.Migration
@@ -11,7 +12,7 @@ namespace BusRouteLondon.Migration
             Console.WriteLine("Started.");
             var fileParser = new BusRouteCSVParser();
             var filename = "BusRoute.csv";
-            var routes = fileParser.Parse(filename);
+            List<BusRoute> routes = fileParser.Parse(filename);
             Console.WriteLine("Successfully read file {0}", filename);
 
             using (var documentStore = new DocumentStore { ConnectionStringName = "RavenDB" })
@@ -27,7 +28,9 @@ namespace BusRouteLondon.Migration
                 }
             }
 
-            Console.WriteLine("Successfully saved {0} routes.", routes.Count());
+
+
+            Console.WriteLine("Successfully saved {0} routes.", routes.Count);
             Console.WriteLine("Done");
             Console.ReadKey();
         }
