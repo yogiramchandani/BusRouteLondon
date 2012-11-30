@@ -6,13 +6,31 @@ namespace BusRouteLondon.Migration
 {
     public class OSGB36ToWGS84 : ISpatialCoordinateConverter
     {
+        private Dictionary<string, Dictionary<string, double>> Cached;
+
         public const string Latitude = "lat";
         public const string Longitude = "lng";
 
         public const string Easting = "easting";
         public const string Northing = "northing";
 
-        public Dictionary<string, decimal> Convert(Dictionary<string, decimal> input)
+        public OSGB36ToWGS84()
+        {
+            Cached = new Dictionary<string, Dictionary<string, double>>();
+        }
+
+        public Dictionary<string, double> Convert(Dictionary<string, int> input)
+        {
+            string key = string.Format("{0}:{1}", input[Easting], input[Northing]);
+            
+            if (!Cached.ContainsKey(key))
+            {
+                Cached.Add(key, CallWebService(input));
+            }
+            return Cached[key];
+        }
+
+        private Dictionary<string, double> CallWebService(Dictionary<string, int> input)
         {
             string url = string.Format("http://www.uk-postcodes.com/eastingnorthing.php?easting={0}&northing={1}", input[Easting], input[Northing]);
 
@@ -27,7 +45,7 @@ namespace BusRouteLondon.Migration
                     var latitudeString = (string)jsonObject[Latitude];
                     var longitudeString = (string)jsonObject[Longitude];
 
-                    return new Dictionary<string, decimal> { { Latitude, decimal.Parse(latitudeString) }, { Longitude, decimal.Parse(longitudeString) } };
+                    return new Dictionary<string, double> { { Latitude, double.Parse(latitudeString) }, { Longitude, double.Parse(longitudeString) } };
                 }    
             }
         }
@@ -35,6 +53,6 @@ namespace BusRouteLondon.Migration
 
     public interface ISpatialCoordinateConverter
     {
-        Dictionary<string, decimal> Convert(Dictionary<string, decimal> input);
+        Dictionary<string, double> Convert(Dictionary<string, int> input);
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 using BusRouteLondon.Web;
 using Microsoft.VisualBasic.FileIO;
@@ -38,8 +36,8 @@ namespace BusRouteLondon.Migration
                                                    {
                                                        BusStopCode = HttpUtility.HtmlEncode(x[4]),
                                                        BusStopName = HttpUtility.HtmlEncode(x[6]),
-                                                       Easting = decimal.Parse(x[7]),
-                                                       Northing = decimal.Parse(x[8])
+                                                       Easting = int.Parse(x[7]),
+                                                       Northing = int.Parse(x[8])
                                                    }
                                     };
                     routes.Add(route);
