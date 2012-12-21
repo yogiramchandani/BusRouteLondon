@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Web;
 using System.Web.Http;
@@ -13,11 +14,33 @@ using Raven.Client.Indexes;
 
 namespace BusRouteLondon.Web
 {
-    // Note: For instructions on enabling IIS6 or IIS7 classic mode, 
-    // visit http://go.microsoft.com/?LinkId=9394801
-
     public class WebApiApplication : HttpApplication
     {
+        private static readonly Lazy<IDocumentStore> _documentStore =
+            new Lazy<IDocumentStore>(() =>
+                                         {
+                                             var docStore = new DocumentStore { ConnectionStringName = "RavenDB" };
+                                             docStore.Initialize();
+                                             TryCreatingIndexesOrRedirectToErrorPage();
+                                             return docStore;
+                                         });
+
+        public static IDocumentStore DocumentStore
+        {
+            get { return _documentStore.Value; }
+        }
+
+        protected void Application_Start()
+        {
+            AreaRegistration.RegisterAllAreas();
+
+            WebApiConfig.Register(GlobalConfiguration.Configuration);
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            RavenController.DocumentStore = DocumentStore;
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
+        }
+
         public WebApiApplication()
         {
             BeginRequest += (sender, args) =>
@@ -41,29 +64,6 @@ namespace BusRouteLondon.Web
                               };
         }
 
-        protected void Application_Start()
-        {
-            AreaRegistration.RegisterAllAreas();
-
-            WebApiConfig.Register(GlobalConfiguration.Configuration);
-            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            InitialiseDocumentStore();
-            RavenController.DocumentStore = DocumentStore;
-            RouteConfig.RegisterRoutes(RouteTable.Routes);
-            BundleConfig.RegisterBundles(BundleTable.Bundles);
-        }
-
-        public static IDocumentStore DocumentStore { get; private set; }
-
-        private static void InitialiseDocumentStore()
-        {
-            if (DocumentStore != null) return;
-            DocumentStore = new DocumentStore
-                                {
-                                    ConnectionStringName = "RavenDB"
-                                }.Initialize();
-            TryCreatingIndexesOrRedirectToErrorPage();
-        }
 
         private static void TryCreatingIndexesOrRedirectToErrorPage()
         {

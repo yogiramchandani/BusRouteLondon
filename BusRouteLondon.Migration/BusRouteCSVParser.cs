@@ -26,24 +26,54 @@ namespace BusRouteLondon.Migration
                         return routes;
                     }
                     int heading;
+                    string routeNum = x[(int) BusCSVFields.Route];
+                    int runNumber = int.Parse(x[(int) BusCSVFields.Run]);
+                    int sequenceNumber = int.Parse(x[(int) BusCSVFields.Sequence]);
                     var route = new BusRoute
-                                    {
-                                        Route = x[0],
-                                        Run = int.Parse(x[1]),
-                                        Sequence = int.Parse(x[2]),
-                                        Heading = int.TryParse(x[9], out heading) ? heading : 0,
-                                        Stop = new BusStop
-                                                   {
-                                                       BusStopCode = HttpUtility.HtmlEncode(x[4]),
-                                                       BusStopName = HttpUtility.HtmlEncode(x[6]),
-                                                       Easting = int.Parse(x[7]),
-                                                       Northing = int.Parse(x[8])
-                                                   }
+                                    {   
+                                        Route = routeNum,
+                                        Run = runNumber,
+                                        Sequence = sequenceNumber,
+                                        Heading = int.TryParse(x[(int)BusCSVFields.Heading], out heading) ? heading : 0,
+                                        Id = string.Format("busroutes/{0}-{1}-{2}", routeNum, runNumber, sequenceNumber)
                                     };
+                    route.Stop = GetStop(x);
                     routes.Add(route);
                 }
             }
         }
+
+        private Dictionary<string, BusStop> _stopDictionary = new Dictionary<string, BusStop>();
+        private BusStop GetStop(string[] parsedCsvStrings)
+        {
+            string busStopCode = HttpUtility.HtmlEncode(parsedCsvStrings[(int) BusCSVFields.BusStopCode]);
+            if (!_stopDictionary.ContainsKey(busStopCode))
+            {
+                var newStop = new BusStop
+                                  {
+                                      Id = string.Format("busstops/{0}",busStopCode),
+                                      BusStopCode = busStopCode,
+                                      BusStopName = HttpUtility.HtmlEncode(parsedCsvStrings[(int) BusCSVFields.BusStopName]),
+                                      Easting = int.Parse(parsedCsvStrings[(int) BusCSVFields.Easting]),
+                                      Northing = int.Parse(parsedCsvStrings[(int) BusCSVFields.Northing])
+                                  };
+                _stopDictionary.Add(busStopCode, newStop);
+            }
+
+            return _stopDictionary[busStopCode];
+        }
+    }
+
+    internal enum BusCSVFields
+    {
+        Route = 0,
+        Run = 1,
+        Sequence = 2,
+        BusStopCode = 4,
+        BusStopName = 6,
+        Easting = 7,
+        Northing = 8,
+        Heading = 9
     }
 
     public interface ICSVParser<T>
