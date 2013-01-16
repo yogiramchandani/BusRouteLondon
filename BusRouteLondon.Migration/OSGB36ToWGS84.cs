@@ -2,6 +2,7 @@
 /*  The transforms below have been adapted from Chris Veness's most excellent JavaScript          */
 /*  library:                                                                                      */
 /*                                                                                                */
+/*  www.movable-type.co.uk                                                                        */
 /*  Coordinate transformations, lat/Long WGS-84 <=> OSGB36  (c) Chris Veness 2005-2012            */
 /*   - www.movable-type.co.uk/scripts/coordtransform.js                                           */
 /*   - www.movable-type.co.uk/scripts/latlong-convert-coords.html                                 */
@@ -29,7 +30,7 @@ namespace BusRouteLondon.Migration
 
             if (!Cached.ContainsKey(key))
             {
-                Cached.TryAdd(key, ConvertOSGB36toWGS84(northing, easting));
+                Cached.TryAdd(key, ConvertOSGB36ToWGS84(northing, easting));
             }
             else
             {
@@ -61,7 +62,7 @@ namespace BusRouteLondon.Migration
          * @param  {LatLon} pWGS84: lat/lon in WGS84 reference frame
          * @return {LatLon} lat/lon point in OSGB36 reference frame
          */
-        private LatLong ConvertOSGB36toWGS84(double northing, double easting)
+        private LatLong ConvertOSGB36ToWGS84(double northing, double easting)
         {
             LatLong pOSGB36 = OSGB36GridToLatLong(northing, easting);
             var eAiry1830 = Ellipse[EllipseEnum.Airy1830];
@@ -79,63 +80,63 @@ namespace BusRouteLondon.Migration
 
         private LatLong OSGB36GridToLatLong(double northing, double easting)
         {
-            var a = 6377563.396;
-            var b = 6356256.910; // Airy 1830 major & minor semi-axes
-            var F0 = 0.9996012717; // NatGrid scale factor on central meridian
-            var lat0 = 49 * Math.PI / 180;
-            var lon0 = -2 * Math.PI / 180; // NatGrid true origin
-            var N0 = -100000;
-            var E0 = 400000; // northing & easting of true origin, metres
-            var e2 = 1 - (b * b) / (a * a); // eccentricity squared
-            var n = (a - b) / (a + b);
-            var n2 = n * n;
-            var n3 = n * n * n;
+            const double a = 6377563.396;
+            const double b = 6356256.910; // Airy 1830 major & minor semi-axes
+            const double f0 = 0.9996012717; // NatGrid scale factor on central meridian
+            const double lat0 = 49 * Math.PI / 180;
+            const double lon0 = -2 * Math.PI / 180; // NatGrid true origin
+            const int n0 = -100000;
+            const int e0 = 400000; // northing & easting of true origin, metres
+            const double e2 = 1 - (b * b) / (a * a); // eccentricity squared
+            const double n = (a - b) / (a + b);
+            const double n2 = n * n;
+            const double n3 = n * n * n;
 
             var lat = lat0;
-            var M = 0d;
+            var m = 0d;
             do
             {
-                lat = (northing - N0 - M) / (a * F0) + lat;
+                lat = (northing - n0 - m) / (a * f0) + lat;
 
-                var Ma = (1 + n + (5 / 4) * n2 + (5 / 4) * n3) * (lat - lat0);
-                var Mb = (3 * n + 3 * n * n + (21 / 8) * n3) * Math.Sin(lat - lat0) * Math.Cos(lat + lat0);
-                var Mc = ((15 / 8) * n2 + (15 / 8) * n3) * Math.Sin(2 * (lat - lat0)) * Math.Cos(2 * (lat + lat0));
-                var Md = (35 / 24) * n3 * Math.Sin(3 * (lat - lat0)) * Math.Cos(3 * (lat + lat0));
-                M = b * F0 * (Ma - Mb + Mc - Md); // meridional arc
+                var ma = (1 + n + (5 / 4) * n2 + (5 / 4) * n3) * (lat - lat0);
+                var mb = (3 * n + 3 * n * n + (21 / 8) * n3) * Math.Sin(lat - lat0) * Math.Cos(lat + lat0);
+                var mc = ((15 / 8) * n2 + (15 / 8) * n3) * Math.Sin(2 * (lat - lat0)) * Math.Cos(2 * (lat + lat0));
+                var md = (35 / 24) * n3 * Math.Sin(3 * (lat - lat0)) * Math.Cos(3 * (lat + lat0));
+                m = b * f0 * (ma - mb + mc - md); // meridional arc
 
-            } while (northing - N0 - M >= 0.00001); // i.e. until < 0.01mm
+            } while (northing - n0 - m >= 0.00001); // i.e. until < 0.01mm
 
             var cosLat = Math.Cos(lat);
             var sinLat = Math.Sin(lat);
-            var nu = a * F0 / Math.Sqrt(1 - e2 * sinLat * sinLat); // transverse radius of curvature
-            var rho = a * F0 * (1 - e2) / Math.Pow(1 - e2 * sinLat * sinLat, 1.5); // meridional radius of curvature
+            var nu = a * f0 / Math.Sqrt(1 - e2 * sinLat * sinLat); // transverse radius of curvature
+            var rho = a * f0 * (1 - e2) / Math.Pow(1 - e2 * sinLat * sinLat, 1.5); // meridional radius of curvature
             var eta2 = nu / rho - 1;
 
             var tanLat = Math.Tan(lat);
-            var tan2lat = tanLat * tanLat;
-            var tan4lat = tan2lat * tan2lat;
-            var tan6lat = tan4lat * tan2lat;
+            var tan2Lat = tanLat * tanLat;
+            var tan4Lat = tan2Lat * tan2Lat;
+            var tan6Lat = tan4Lat * tan2Lat;
             var secLat = 1 / cosLat;
             var nu3 = nu * nu * nu;
             var nu5 = nu3 * nu * nu;
             var nu7 = nu5 * nu * nu;
-            var VII = tanLat / (2 * rho * nu);
-            var VIII = tanLat / (24 * rho * nu3) * (5 + 3 * tan2lat + eta2 - 9 * tan2lat * eta2);
-            var IX = tanLat / (720 * rho * nu5) * (61 + 90 * tan2lat + 45 * tan4lat);
-            var X = secLat / nu;
-            var XI = secLat / (6 * nu3) * (nu / rho + 2 * tan2lat);
-            var XII = secLat / (120 * nu5) * (5 + 28 * tan2lat + 24 * tan4lat);
-            var XIIA = secLat / (5040 * nu7) * (61 + 662 * tan2lat + 1320 * tan4lat + 720 * tan6lat);
+            var vii = tanLat / (2 * rho * nu);
+            var viii = tanLat / (24 * rho * nu3) * (5 + 3 * tan2Lat + eta2 - 9 * tan2Lat * eta2);
+            var ix = tanLat / (720 * rho * nu5) * (61 + 90 * tan2Lat + 45 * tan4Lat);
+            var x = secLat / nu;
+            var xi = secLat / (6 * nu3) * (nu / rho + 2 * tan2Lat);
+            var xii = secLat / (120 * nu5) * (5 + 28 * tan2Lat + 24 * tan4Lat);
+            var xiia = secLat / (5040 * nu7) * (61 + 662 * tan2Lat + 1320 * tan4Lat + 720 * tan6Lat);
 
-            var dE = (easting - E0);
+            var dE = (easting - e0);
             var dE2 = dE * dE;
             var dE3 = dE2 * dE;
             var dE4 = dE2 * dE2;
             var dE5 = dE3 * dE2;
             var dE6 = dE4 * dE2;
             var dE7 = dE5 * dE2;
-            lat = lat - VII * dE2 + VIII * dE4 - IX * dE6;
-            var lon = lon0 + X * dE - XI * dE3 + XII * dE5 - XIIA * dE7;
+            lat = lat - vii * dE2 + viii * dE4 - ix * dE6;
+            var lon = lon0 + x * dE - xi * dE3 + xii * dE5 - xiia * dE7;
 
             return new LatLong(ToDegree(lat), ToDegree(lon));
         }
@@ -167,14 +168,14 @@ namespace BusRouteLondon.Migration
             var cosPhi = Math.Cos(lat);
             var sinLambda = Math.Sin(lon);
             var cosLambda = Math.Cos(lon);
-            var H = 24.7; // for the moment
+            var h = 24.7; // for the moment
 
             var eSq = (a * a - b * b) / (a * a);
             var nu = a / Math.Sqrt(1 - eSq * sinPhi * sinPhi);
 
-            var x1 = (nu + H) * cosPhi * cosLambda;
-            var y1 = (nu + H) * cosPhi * sinLambda;
-            var z1 = ((1 - eSq) * nu + H) * sinPhi;
+            var x1 = (nu + h) * cosPhi * cosLambda;
+            var y1 = (nu + h) * cosPhi * sinLambda;
+            var z1 = ((1 - eSq) * nu + h) * sinPhi;
 
 
             // -- 2: apply Helmert transform using appropriate params
@@ -210,9 +211,9 @@ namespace BusRouteLondon.Migration
                 phi = Math.Atan2(z2 + eSq * nu * Math.Sin(phi), p);
             }
             var lambda = Math.Atan2(y2, x2);
-            H = p / Math.Cos(phi) - nu;
+            h = p / Math.Cos(phi) - nu;
 
-            return new LatLong(ToDegree(phi), ToDegree(lambda), H);
+            return new LatLong(ToDegree(phi), ToDegree(lambda), h);
         }
 
         public struct TransformData
