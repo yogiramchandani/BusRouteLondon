@@ -34,8 +34,7 @@ namespace BusRouteLondon.Migration
                                         Route = routeNum,
                                         Run = runNumber,
                                         Sequence = sequenceNumber,
-                                        Heading = int.TryParse(x[(int)BusCSVFields.Heading], out heading) ? heading : 0,
-                                        Id = string.Format("busroutes/{0}-{1}-{2}", routeNum, runNumber, sequenceNumber)
+                                        Heading = int.TryParse(x[(int)BusCSVFields.Heading], out heading) ? heading : 0
                                     };
                     route.Stop = GetStop(x);
                     routes.Add(route);

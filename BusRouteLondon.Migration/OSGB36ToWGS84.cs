@@ -1,36 +1,35 @@
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
+/*  The transforms below have been adapted from Chris Veness's most excellent JavaScript          */
+/*  library:                                                                                      */
+/*                                                                                                */
+/*  Coordinate transformations, lat/Long WGS-84 <=> OSGB36  (c) Chris Veness 2005-2012            */
+/*   - www.movable-type.co.uk/scripts/coordtransform.js                                           */
+/*   - www.movable-type.co.uk/scripts/latlong-convert-coords.html                                 */
+/*   - www.movable-type.co.uk/scripts/gridref.js                                                  */
+/*   - www.movable-type.co.uk/scripts/latlon-gridref.html                                         */
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  */
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using Newtonsoft.Json.Linq;
 
 namespace BusRouteLondon.Migration
 {
     public class OSGB36ToWGS84 : ISpatialCoordinateConverter
     {
-        private ConcurrentDictionary<string, Dictionary<string, double>> Cached;
-        private ConcurrentDictionary<string, string> Exceptions;
+        private ConcurrentDictionary<string, LatLong> Cached;
         
-        public const string Latitude = "lat";
-        public const string Longitude = "lng";
-
-        public const string Easting = "easting";
-        public const string Northing = "northing";
-
         public OSGB36ToWGS84()
         {
-            Cached = new ConcurrentDictionary<string, Dictionary<string, double>>();
-            Exceptions = new ConcurrentDictionary<string, string>();
+            Cached = new ConcurrentDictionary<string, LatLong>();
         }
 
-        public Dictionary<string, double> Convert(Dictionary<string, int> input)
+        public LatLong Convert(int easting, int northing)
         {
-            string key = string.Format("{0}:{1}", input[Easting], input[Northing]);
+            string key = string.Format("{0}:{1}", easting, northing);
 
             if (!Cached.ContainsKey(key))
             {
-                Cached.TryAdd(key, CallWebService(input));
+                Cached.TryAdd(key, ConvertOSGB36toWGS84(northing, easting));
             }
             else
             {
@@ -38,56 +37,252 @@ namespace BusRouteLondon.Migration
             }
             return Cached[key];
         }
-
-        private Dictionary<string, double> CallWebService(Dictionary<string, int> input)
+        
+        public enum EllipseEnum
         {
-            try
+            WGS84,
+            GRS80,
+            Airy1830,
+            AiryModified,
+            Intl1924
+        }
+        
+        // ellipse parameters
+        public Dictionary<EllipseEnum, EllipseData> Ellipse =
+            new Dictionary<EllipseEnum, EllipseData>
+                {
+                    {EllipseEnum.WGS84, new EllipseData(6378137, 6356752.3142,1/298.257223563)},
+                    {EllipseEnum.Airy1830, new EllipseData(6377563.396, 6356256.910,1/299.3249646)}
+                };
+
+        /**
+         * Convert lat/lon point in WGS84 to OSGB36
+         *
+         * @param  {LatLon} pWGS84: lat/lon in WGS84 reference frame
+         * @return {LatLon} lat/lon point in OSGB36 reference frame
+         */
+        private LatLong ConvertOSGB36toWGS84(double northing, double easting)
+        {
+            LatLong pOSGB36 = OSGB36GridToLatLong(northing, easting);
+            var eAiry1830 = Ellipse[EllipseEnum.Airy1830];
+            var eWGS84 = Ellipse[EllipseEnum.WGS84];
+
+            // ED50: og.decc.gov.uk/en/olgs/cms/pons_and_cop/pons/pon4/pon4.aspx
+            // strictly, Ireland 1975 is from ETRF89: qv 
+            // www.osi.ie/OSI/media/OSI/Content/Publications/transformations_booklet.pdf
+            // www.ordnancesurvey.co.uk/oswebsite/gps/information/coordinatesystemsinfo/guidecontents/guide6.html#6.5
+            // helmert transform parameters from OSGB36 to WGS84
+            var txFromOSGB36 = new TransformData(446.448,  -125.157,   542.060,  0.1502, 0.2470,  0.8421, -20.4894);
+            var pWGS84 = ConvertEllipsoid(pOSGB36, eAiry1830, txFromOSGB36, eWGS84);
+            return pWGS84;
+        }
+
+        private LatLong OSGB36GridToLatLong(double northing, double easting)
+        {
+            var a = 6377563.396;
+            var b = 6356256.910; // Airy 1830 major & minor semi-axes
+            var F0 = 0.9996012717; // NatGrid scale factor on central meridian
+            var lat0 = 49 * Math.PI / 180;
+            var lon0 = -2 * Math.PI / 180; // NatGrid true origin
+            var N0 = -100000;
+            var E0 = 400000; // northing & easting of true origin, metres
+            var e2 = 1 - (b * b) / (a * a); // eccentricity squared
+            var n = (a - b) / (a + b);
+            var n2 = n * n;
+            var n3 = n * n * n;
+
+            var lat = lat0;
+            var M = 0d;
+            do
             {
-                string url = string.Format("http://www.uk-postcodes.com/eastingnorthing.php?easting={0}&northing={1}", input[Easting], input[Northing]);
+                lat = (northing - N0 - M) / (a * F0) + lat;
 
-                var request = System.Net.HttpWebRequest.Create(url);
+                var Ma = (1 + n + (5 / 4) * n2 + (5 / 4) * n3) * (lat - lat0);
+                var Mb = (3 * n + 3 * n * n + (21 / 8) * n3) * Math.Sin(lat - lat0) * Math.Cos(lat + lat0);
+                var Mc = ((15 / 8) * n2 + (15 / 8) * n3) * Math.Sin(2 * (lat - lat0)) * Math.Cos(2 * (lat + lat0));
+                var Md = (35 / 24) * n3 * Math.Sin(3 * (lat - lat0)) * Math.Cos(3 * (lat + lat0));
+                M = b * F0 * (Ma - Mb + Mc - Md); // meridional arc
 
-                using (var response = request.GetResponse())
-                {
-                    using (var reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        var webResult = reader.ReadToEnd();
-                        var jsonObject = JObject.Parse(webResult);
-                        var latitudeString = (string) jsonObject[Latitude];
-                        var longitudeString = (string) jsonObject[Longitude];
+            } while (northing - N0 - M >= 0.00001); // i.e. until < 0.01mm
 
-                        return new Dictionary<string, double>
-                                   {
-                                       {Latitude, double.Parse(latitudeString)},
-                                       {Longitude, double.Parse(longitudeString)}
-                                   };
-                    }
-                }
-            }
-            catch (WebException)
+            var cosLat = Math.Cos(lat);
+            var sinLat = Math.Sin(lat);
+            var nu = a * F0 / Math.Sqrt(1 - e2 * sinLat * sinLat); // transverse radius of curvature
+            var rho = a * F0 * (1 - e2) / Math.Pow(1 - e2 * sinLat * sinLat, 1.5); // meridional radius of curvature
+            var eta2 = nu / rho - 1;
+
+            var tanLat = Math.Tan(lat);
+            var tan2lat = tanLat * tanLat;
+            var tan4lat = tan2lat * tan2lat;
+            var tan6lat = tan4lat * tan2lat;
+            var secLat = 1 / cosLat;
+            var nu3 = nu * nu * nu;
+            var nu5 = nu3 * nu * nu;
+            var nu7 = nu5 * nu * nu;
+            var VII = tanLat / (2 * rho * nu);
+            var VIII = tanLat / (24 * rho * nu3) * (5 + 3 * tan2lat + eta2 - 9 * tan2lat * eta2);
+            var IX = tanLat / (720 * rho * nu5) * (61 + 90 * tan2lat + 45 * tan4lat);
+            var X = secLat / nu;
+            var XI = secLat / (6 * nu3) * (nu / rho + 2 * tan2lat);
+            var XII = secLat / (120 * nu5) * (5 + 28 * tan2lat + 24 * tan4lat);
+            var XIIA = secLat / (5040 * nu7) * (61 + 662 * tan2lat + 1320 * tan4lat + 720 * tan6lat);
+
+            var dE = (easting - E0);
+            var dE2 = dE * dE;
+            var dE3 = dE2 * dE;
+            var dE4 = dE2 * dE2;
+            var dE5 = dE3 * dE2;
+            var dE6 = dE4 * dE2;
+            var dE7 = dE5 * dE2;
+            lat = lat - VII * dE2 + VIII * dE4 - IX * dE6;
+            var lon = lon0 + X * dE - XI * dE3 + XII * dE5 - XIIA * dE7;
+
+            return new LatLong(ToDegree(lat), ToDegree(lon));
+        }
+
+        /**
+         * Convert lat/lon from one ellipsoidal model to another
+         *
+         * q.v. Ordnance Survey 'A guide to coordinate systems in Great Britain' Section 6
+         *      www.ordnancesurvey.co.uk/oswebsite/gps/docs/A_Guide_to_Coordinate_Systems_in_Great_Britain.pdf
+         *
+         * @private
+         * @param {LatLon}   point: lat/lon in source reference frame
+         * @param {Number[]} e1:    source ellipse parameters
+         * @param {Number[]} t:     Helmert transform parameters
+         * @param {Number[]} e1:    target ellipse parameters
+         * @return {Coord} lat/lon in target reference frame
+         */
+        private LatLong ConvertEllipsoid(LatLong point, EllipseData e1, TransformData t, EllipseData e2)
+        {
+            // -- 1: convert polar to Cartesian coordinates (using ellipse 1)
+
+            var lat = ToRadian(point.Lat);
+            var lon = ToRadian(point.Long);
+
+            var a = e1.A;
+            var b = e1.B;
+
+            var sinPhi = Math.Sin(lat);
+            var cosPhi = Math.Cos(lat);
+            var sinLambda = Math.Sin(lon);
+            var cosLambda = Math.Cos(lon);
+            var H = 24.7; // for the moment
+
+            var eSq = (a * a - b * b) / (a * a);
+            var nu = a / Math.Sqrt(1 - eSq * sinPhi * sinPhi);
+
+            var x1 = (nu + H) * cosPhi * cosLambda;
+            var y1 = (nu + H) * cosPhi * sinLambda;
+            var z1 = ((1 - eSq) * nu + H) * sinPhi;
+
+
+            // -- 2: apply Helmert transform using appropriate params
+
+            var tx = t.Tx;
+            var ty = t.Ty;
+            var tz = t.Tz;
+            var rx = ToRadian(t.Rx / 3600); // normalise seconds to radians
+            var ry = ToRadian(t.Ry / 3600);
+            var rz = ToRadian(t.Rz / 3600);
+            var s1 = t.S / 1e6 + 1; // normalise ppm to (s+1)
+
+            // apply transform
+            var x2 = tx + x1 * s1 - y1 * rz + z1 * ry;
+            var y2 = ty + x1 * rz + y1 * s1 - z1 * rx;
+            var z2 = tz - x1 * ry + y1 * rx + z1 * s1;
+
+
+            // -- 3: convert Cartesian to polar coordinates (using ellipse 2)
+
+            a = e2.A;
+            b = e2.B;
+            var precision = 4 / a; // results accurate to around 4 metres
+
+            eSq = (a * a - b * b) / (a * a);
+            var p = Math.Sqrt(x2 * x2 + y2 * y2);
+            var phi = Math.Atan2(z2, p * (1 - eSq));
+            var phiP = 2 * Math.PI;
+            while (Math.Abs(phi - phiP) > precision)
             {
-                string key = string.Format("{0}:{1}", input[Easting], input[Northing]);
-                if (!Exceptions.ContainsKey(key))
-                {
-	                Console.ForegroundColor = ConsoleColor.Magenta;
-                    Console.WriteLine("1st exception, retry for route {0}", key);
-                    Console.ResetColor();
-                    Exceptions.TryAdd(key, key);
-                    return CallWebService(input);
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("2nd exception, cancelling request for route {0}", key);
-                    Console.ResetColor();
-                    return null;
-                }
+                nu = a / Math.Sqrt(1 - eSq * Math.Sin(phi) * Math.Sin(phi));
+                phiP = phi;
+                phi = Math.Atan2(z2 + eSq * nu * Math.Sin(phi), p);
             }
+            var lambda = Math.Atan2(y2, x2);
+            H = p / Math.Cos(phi) - nu;
+
+            return new LatLong(ToDegree(phi), ToDegree(lambda), H);
+        }
+
+        public struct TransformData
+        {
+            public TransformData(double tx, double ty, double tz, double rx, double ry, double rz, double s)
+                : this()
+            {
+                Tx = tx;
+                Ty = ty;
+                Tz = tz;
+                Rx = rx;
+                Ry = ry;
+                Rz = rz;
+                S = s;
+            }
+
+            public double Tx { get; private set; }
+            public double Ty { get; private set; }
+            public double Tz { get; private set; }
+
+            public double Rx { get; private set; }
+            public double Ry { get; private set; }
+            public double Rz { get; private set; }
+
+            public double S { get; private set; }
+        }
+
+        public struct EllipseData
+        {
+            public EllipseData(double a, double b, double c)
+                : this()
+            {
+                A = a;
+                B = b;
+                C = c;
+            }
+
+            public double A { get; private set; }
+            public double B { get; private set; }
+            public double C { get; private set; }
+        }
+        
+        public double ToDegree(double radian)
+        {
+            return (radian * 180) / Math.PI;
+        }
+
+        public double ToRadian(double degree)
+        {
+            return (degree * Math.PI) / 180;
         }
     }
 
     public interface ISpatialCoordinateConverter
     {
-        Dictionary<string, double> Convert(Dictionary<string, int> input);
+        LatLong Convert(int easting, int northing);
+    }
+
+    public struct LatLong
+    {
+        public LatLong(double lat, double @long, double rad = 6371)
+            : this()
+        {
+            Lat = lat;
+            Long = @long;
+            Rad = rad;
+        }
+
+        public double Lat { get; private set; }
+        public double Long { get; private set; }
+        public double Rad { get; private set; }
     }
 }

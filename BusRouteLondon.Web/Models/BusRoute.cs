@@ -2,7 +2,7 @@ namespace BusRouteLondon.Web
 {
     public class BusRoute
     {
-        public string Id;
+        public string Id { get; set; }
         public string Route { get; set; }
         public int Run { get; set; }
         public int Sequence { get; set; }

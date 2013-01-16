@@ -13,32 +13,32 @@ namespace BusRouteLondon.Migration.Test
         public void Convert_SetHolbornStationOSGB36_ExpectWGS84Latitude()
         {
             var sut = new OSGB36ToWGS84();
-            var result = sut.Convert(new Dictionary<string, int> { { OSGB36ToWGS84.Easting, 530561 }, { OSGB36ToWGS84.Northing, 181433 } });
-            Assert.Equal(51.516739639323D, result[OSGB36ToWGS84.Latitude]);
+            var result = sut.Convert(530561, 181433);
+            Assert.Equal<double>(51.5167296657411, result.Lat);
         }
 
         [Fact]
         public void Convert_SetHolbornStationOSGB36_ExpectWGS84Longitude()
         {
             var sut = new OSGB36ToWGS84();
-            var result = sut.Convert(new Dictionary<string, int> { { OSGB36ToWGS84.Easting, 530561 }, { OSGB36ToWGS84.Northing, 181433 } });
-            Assert.Equal(-0.11973122223921D, result[OSGB36ToWGS84.Longitude]);
+            var result = sut.Convert(530561, 181433);
+            Assert.Equal(-0.119746022882573d, result.Long);
         }
 
         [Fact]
         public void Convert_SetGlentrammonRoadOSGB36_ExpectWGS84Latitude()
         {
             var sut = new OSGB36ToWGS84();
-            var result = sut.Convert(new Dictionary<string, int> { { OSGB36ToWGS84.Easting, 545562 }, { OSGB36ToWGS84.Northing, 163994 } });
-            Assert.Equal(51.356377436224D, result[OSGB36ToWGS84.Latitude]);
+            var result = sut.Convert(545562, 163994);
+            Assert.Equal(51.3563684129182d, result.Lat);
         }
 
         [Fact]
         public void Convert_SetGlentrammonRoadOSGB36_ExpectWGS84Longitude()
         {
             var sut = new OSGB36ToWGS84();
-            var result = sut.Convert(new Dictionary<string, int> { { OSGB36ToWGS84.Easting, 545562 }, { OSGB36ToWGS84.Northing, 163994 } });
-            Assert.Equal(0.089153754011666D, result[OSGB36ToWGS84.Longitude]);
+            var result = sut.Convert(545562, 163994);
+            Assert.Equal(0.0891389877307144d, result.Long);
         }
     }
 }
