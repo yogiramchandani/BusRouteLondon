@@ -14,7 +14,7 @@ namespace BusRouteLondon.Migration.Test
         {
             var sut = new OSGB36ToWGS84();
             var result = sut.Convert(530561, 181433);
-            Assert.Equal<double>(51.5167296657411, result.Lat);
+            Assert.Equal(51.5167296657411, result.Lat, 13);
         }
 
         [Fact]
@@ -22,7 +22,7 @@ namespace BusRouteLondon.Migration.Test
         {
             var sut = new OSGB36ToWGS84();
             var result = sut.Convert(530561, 181433);
-            Assert.Equal(-0.119746022882573d, result.Long);
+            Assert.Equal(-0.119746022882573d, result.Long, 13);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace BusRouteLondon.Migration.Test
         {
             var sut = new OSGB36ToWGS84();
             var result = sut.Convert(545562, 163994);
-            Assert.Equal(51.3563684129182d, result.Lat);
+            Assert.Equal(51.3563684129182d, result.Lat, 13);
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace BusRouteLondon.Migration.Test
         {
             var sut = new OSGB36ToWGS84();
             var result = sut.Convert(545562, 163994);
-            Assert.Equal(0.0891389877307144d, result.Long);
+            Assert.Equal(0.0891389877307144d, result.Long, 13);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace BusRouteLondon.Web.Tests.Controllers
         public void Get()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             var result = controller.Get();
@@ -26,7 +26,7 @@ namespace BusRouteLondon.Web.Tests.Controllers
         public void GetById()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             string result = controller.Get(5);
@@ -39,7 +39,7 @@ namespace BusRouteLondon.Web.Tests.Controllers
         public void Post()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Post("value");
@@ -51,7 +51,7 @@ namespace BusRouteLondon.Web.Tests.Controllers
         public void Put()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Put(5, "value");
@@ -63,7 +63,7 @@ namespace BusRouteLondon.Web.Tests.Controllers
         public void Delete()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            var controller = new ValuesController();
 
             // Act
             controller.Delete(5);

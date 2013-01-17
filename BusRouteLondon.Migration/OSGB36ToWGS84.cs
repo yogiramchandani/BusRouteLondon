@@ -12,6 +12,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace BusRouteLondon.Migration
 {
@@ -49,12 +50,19 @@ namespace BusRouteLondon.Migration
         }
         
         // ellipse parameters
-        public Dictionary<EllipseEnum, EllipseData> Ellipse =
-            new Dictionary<EllipseEnum, EllipseData>
-                {
-                    {EllipseEnum.WGS84, new EllipseData(6378137, 6356752.3142,1/298.257223563)},
-                    {EllipseEnum.Airy1830, new EllipseData(6377563.396, 6356256.910,1/299.3249646)}
-                };
+        private static readonly ReadOnlyDictionary<EllipseEnum, EllipseData> Ellipse = 
+            new ReadOnlyDictionary<EllipseEnum, EllipseData>(new Dictionary<EllipseEnum, EllipseData>
+            {
+                {EllipseEnum.WGS84, new EllipseData(6378137, 6356752.3142,1/298.257223563)},
+                {EllipseEnum.Airy1830, new EllipseData(6377563.396, 6356256.910,1/299.3249646)}
+            });
+
+        // ED50: og.decc.gov.uk/en/olgs/cms/pons_and_cop/pons/pon4/pon4.aspx
+        // strictly, Ireland 1975 is from ETRF89: qv 
+        // www.osi.ie/OSI/media/OSI/Content/Publications/transformations_booklet.pdf
+        // www.ordnancesurvey.co.uk/oswebsite/gps/information/coordinatesystemsinfo/guidecontents/guide6.html#6.5
+        // helmert transform parameters from OSGB36 to WGS84
+        private static readonly TransformData TransformFromOSGB36ToWGS84 = new TransformData(446.448, -125.157, 542.060, 0.1502, 0.2470, 0.8421, -20.4894);
 
         /**
          * Convert lat/lon point in WGS84 to OSGB36
@@ -64,18 +72,8 @@ namespace BusRouteLondon.Migration
          */
         private LatLong ConvertOSGB36ToWGS84(double northing, double easting)
         {
-            LatLong pOSGB36 = OSGB36GridToLatLong(northing, easting);
-            var eAiry1830 = Ellipse[EllipseEnum.Airy1830];
-            var eWGS84 = Ellipse[EllipseEnum.WGS84];
-
-            // ED50: og.decc.gov.uk/en/olgs/cms/pons_and_cop/pons/pon4/pon4.aspx
-            // strictly, Ireland 1975 is from ETRF89: qv 
-            // www.osi.ie/OSI/media/OSI/Content/Publications/transformations_booklet.pdf
-            // www.ordnancesurvey.co.uk/oswebsite/gps/information/coordinatesystemsinfo/guidecontents/guide6.html#6.5
-            // helmert transform parameters from OSGB36 to WGS84
-            var txFromOSGB36 = new TransformData(446.448,  -125.157,   542.060,  0.1502, 0.2470,  0.8421, -20.4894);
-            var pWGS84 = ConvertEllipsoid(pOSGB36, eAiry1830, txFromOSGB36, eWGS84);
-            return pWGS84;
+            LatLong LatLongOSGB36 = OSGB36GridToLatLong(northing, easting);
+            return ConvertEllipsoidOSGB36ToWGS84(LatLongOSGB36);
         }
 
         private LatLong OSGB36GridToLatLong(double northing, double easting)
@@ -149,20 +147,23 @@ namespace BusRouteLondon.Migration
          *
          * @private
          * @param {LatLon}   point: lat/lon in source reference frame
-         * @param {Number[]} e1:    source ellipse parameters
+         * @param {Number[]} sourceEllipse:    source ellipse parameters
          * @param {Number[]} t:     Helmert transform parameters
-         * @param {Number[]} e1:    target ellipse parameters
+         * @param {Number[]} targetEllipse:    target ellipse parameters
          * @return {Coord} lat/lon in target reference frame
          */
-        private LatLong ConvertEllipsoid(LatLong point, EllipseData e1, TransformData t, EllipseData e2)
+        private LatLong ConvertEllipsoidOSGB36ToWGS84(LatLong point)
         {
+            var t = TransformFromOSGB36ToWGS84;
+            var sourceEllipse = Ellipse[EllipseEnum.Airy1830];
+            var targetEllipse = Ellipse[EllipseEnum.WGS84];
             // -- 1: convert polar to Cartesian coordinates (using ellipse 1)
 
             var lat = ToRadian(point.Lat);
             var lon = ToRadian(point.Long);
 
-            var a = e1.A;
-            var b = e1.B;
+            var a = sourceEllipse.A;
+            var b = sourceEllipse.B;
 
             var sinPhi = Math.Sin(lat);
             var cosPhi = Math.Cos(lat);
@@ -196,8 +197,8 @@ namespace BusRouteLondon.Migration
 
             // -- 3: convert Cartesian to polar coordinates (using ellipse 2)
 
-            a = e2.A;
-            b = e2.B;
+            a = targetEllipse.A;
+            b = targetEllipse.B;
             var precision = 4 / a; // results accurate to around 4 metres
 
             eSq = (a * a - b * b) / (a * a);
