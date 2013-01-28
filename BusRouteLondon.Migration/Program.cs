@@ -22,10 +22,11 @@ namespace BusRouteLondon.Migration
 
         private static void MigrateBusRoute()
         {
-            Console.WriteLine("Migrating Bus Routes.");
+            Console.WriteLine("Read File and parse bus routes.");
             var fileParser = new BusRouteCSVParser();
             var filename = "BusRoute.csv";
             List<BusRoute> routes = fileParser.Parse(filename);
+
             Console.WriteLine("Successfully read file {0}", filename);
             UpdateOSGB36ToWGS84(routes);
 
@@ -65,8 +66,7 @@ namespace BusRouteLondon.Migration
 
                 documentStore.DatabaseCommands.EnsureDatabaseExists(BusDB);
                 documentStore.Conventions.RegisterIdConvention<BusRoute>(
-                    (dbName, command, route) =>
-                    string.Format("busroutes/{0}-{1}-{2}", route.Route, route.Run, route.Sequence));
+                    (dbName, command, route) => string.Format("busroutes/{0}-{1}-{2}", route.Route, route.Run, route.Sequence));
                 using (var session = documentStore.OpenSession(BusDB))
                 {
                     action(session);
