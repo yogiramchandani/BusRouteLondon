@@ -11,6 +11,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
             Map = busRoutes => from busRoute in busRoutes
                                select new
                                           {
+                                              _ = (object)null,
                                               busRoute.Stop.BusStopCode,
                                               busRoute.Stop.BusStopName,
                                               busRoute.Stop.Latitude,
@@ -21,6 +22,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
             Reduce = busStops => from busStop in busStops
                                  group busStop by new
                                                       {
+                                                          _ = (object) null,
                                                           busStop.BusStopCode,
                                                           busStop.BusStopName,
                                                           busStop.Latitude,
@@ -31,6 +33,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
                                  into g
                                  select new
                                             {
+                                                _ = SpatialIndex.Generate(g.Key.Latitude, g.Key.Longitude),
                                                 g.Key.BusStopCode,
                                                 g.Key.BusStopName,
                                                 g.Key.Latitude,

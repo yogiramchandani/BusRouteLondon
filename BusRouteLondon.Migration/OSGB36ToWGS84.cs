@@ -13,6 +13,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using BusRouteLondon.Web;
 
 namespace BusRouteLondon.Migration
 {
@@ -25,6 +27,21 @@ namespace BusRouteLondon.Migration
             Cached = new ConcurrentDictionary<string, LatLong>();
         }
 
+        public void ConvertRoutes(List<BusRoute> routes)
+        {
+            Parallel.ForEach(routes, route =>
+            {
+                if (route.Stop.Longitude != 0 && route.Stop.Latitude != 0)
+                {
+                    return;
+                }
+                var result = Convert(route.Stop.Easting, route.Stop.Northing);
+
+                route.Stop.Latitude = result.Lat;
+                route.Stop.Longitude = result.Long;
+            });
+        }
+
         public LatLong Convert(int easting, int northing)
         {
             string key = string.Format("{0}:{1}", easting, northing);
@@ -32,10 +49,6 @@ namespace BusRouteLondon.Migration
             if (!Cached.ContainsKey(key))
             {
                 Cached.TryAdd(key, ConvertOSGB36ToWGS84(northing, easting));
-            }
-            else
-            {
-                Console.WriteLine("Cache used");
             }
             return Cached[key];
         }

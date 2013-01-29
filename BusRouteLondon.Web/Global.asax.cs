@@ -21,7 +21,7 @@ namespace BusRouteLondon.Web
                                          {
                                              var docStore = new DocumentStore { ConnectionStringName = "RavenDB" };
                                              docStore.Initialize();
-                                             TryCreatingIndexesOrRedirectToErrorPage();
+                                             TryCreatingIndexesOrRedirectToErrorPage(docStore);
                                              return docStore;
                                          });
 
@@ -45,7 +45,7 @@ namespace BusRouteLondon.Web
         {
             BeginRequest += (sender, args) =>
                                 {
-                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = RavenController.DocumentStore.OpenSession();
+                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = RavenController.DocumentStore.OpenSession("BusRouteLondonDB");
                                 };
             EndRequest += (sender, args) =>
                               {
@@ -65,11 +65,11 @@ namespace BusRouteLondon.Web
         }
 
 
-        private static void TryCreatingIndexesOrRedirectToErrorPage()
+        private static void TryCreatingIndexesOrRedirectToErrorPage(IDocumentStore store)
         {
             try
             {
-                IndexCreation.CreateIndexes(typeof(BusStop_BusStopCode).Assembly, DocumentStore);
+                IndexCreation.CreateIndexes(typeof(BusStop_BusStopCode).Assembly, store);
             }
             catch (WebException e)
             {

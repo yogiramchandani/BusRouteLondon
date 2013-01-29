@@ -1,53 +1,70 @@
-﻿<header>
+﻿
+<script type="text/javascript">
+    function initialize() {
+        var mapOptions = {
+            center: new google.maps.LatLng(51.515, -0.141),
+            zoom: 14,
+            scaleControl: true,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+        google.maps.event.addListener(map, 'dragend', function () { mapDragEnd(map); });
+        google.maps.event.addListener(map, 'tilesloaded', function () { mapDragEnd(map); });
+    }
+
+    function mapDragEnd(map) {
+        var bounds = map.getBounds();
+        var center = bounds.getCenter();
+        var ne = bounds.getNorthEast();
+        
+        var radiusMeter = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
+        var radiusMiles = radiusMeter * 0.000621371192;
+
+        $('#latLngDiv').html(
+            "Center (Lat: " + center.lat() + " Lng: " + center.lng() + ") " + 
+            "Radius in miles (" + radiusMiles + ")");
+    }
+    
+    function loadScript() {
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyDelN_I3DeYdJrMUp43bMxOOpgcDwCjy9o&sensor=false&callback=initialize&libraries=geometry";
+        document.body.appendChild(script);
+    }
+    
+    function approxDistanceCalculator() {
+        
+    }
+
+    window.onload = loadScript;
+</script>
+
+<header>
     <div class="content-wrapper">
         <div class="float-left">
             <p class="site-title">
-                <a href="~/">ASP.NET Web API</a></p>
+                <a href="~/">TFL Bus Map</a></p>
         </div>
     </div>
 </header>
 <div id="body">
     <section class="featured">
         <div class="content-wrapper">
-            <hgroup class="title">
-                <h1>Welcome to ASP.NET Web API!</h1>
-                <h2>Modify the code in this template to jump-start your ASP.NET Web API development.</h2>
-            </hgroup>
-            <p>
-                ASP.NET Web API allows you to expose your applications, data and services to the
-                web directly over HTTP.
-            </p>
-            <p>
-                To learn more about ASP.NET Web API visit
-                <a href="http://go.microsoft.com/fwlink/?LinkID=238195" title="ASP.NET Web API Website">http://asp.net/web-api</a>.
-                The page features <mark>videos, tutorials, and samples</mark> to help you get the most from ASP.NET Web API.
-                If you have any questions about ASP.NET Web API, visit
-                <a href="http://go.microsoft.com/fwlink/?LinkID=238196" title="ASP.NET Web API Forum">our forums</a>.
-            </p>
+            <h3>
+                View the TFL bus routes on Google maps.
+            </h3>
         </div>
     </section>
     <section class="content-wrapper main-content clear-fix">
-        <h3>We suggest the following steps:</h3>
-        <ol class="round">
-            <li class="one">
-                <h5>Getting Started</h5>
-                ASP.NET Web API is a framework that makes it easy to build HTTP services that reach
-                a broad range of clients, including browsers and mobile devices. ASP.NET Web API
-                is an ideal platform for building RESTful applications on the .NET Framework.
-                <a href="http://go.microsoft.com/fwlink/?LinkId=245160">Learn more…</a>
-            </li>
-
-            <li class="two">
-                <h5>Add NuGet packages and jump-start your coding</h5>
-                NuGet makes it easy to install and update free libraries and tools.
-                <a href="http://go.microsoft.com/fwlink/?LinkId=245161">Learn more…</a>
-            </li>
-            <li class="three">
-                <h5>Find Web Hosting</h5>
-                You can easily find a web hosting company that offers the right mix of features
-                and price for your applications.
-                <a href="http://go.microsoft.com/fwlink/?LinkId=245164">Learn more…</a>
-            </li>
-        </ol>
+        Drag and zoom using your mouse. Current map boundary: <div id="latLngDiv">?</div>
+        <br/>
+        <section class="float-left">
+            <ul>
+                <li>l1 asdas londgewfsd sdf sd</li>
+                <li>l2 asdas londgewfsd sdf sd</li>
+                <li>l3 asdas londgewfsd sdf sd</li>    
+            </ul>
+        </section>
+        <div id="map_canvas" style="height:500px"></div>
     </section>
 </div>
