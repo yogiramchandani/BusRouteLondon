@@ -21,12 +21,6 @@ namespace BusRouteLondon.Migration
         }
 
         [Fact]
-        public void Parse_SecondLine_ExpectSequence()
-        {
-            Assert.Equal(2, Routes.ElementAt(1).Sequence);
-        }
-
-        [Fact]
         public void Parse_FirstLine_ExpectHeading()
         {
             Assert.Equal(75, Routes.ElementAt(0).Heading);
@@ -42,6 +36,12 @@ namespace BusRouteLondon.Migration
         public void Parse_FirstLine_ExpectStopName()
         {
             Assert.Equal("NEW OXFORD, STREET", Routes.ElementAt(0).Stop.BusStopName);
+        }
+
+        [Fact]
+        public void Parse_SecondLine_ExpectSequence()
+        {
+            Assert.Equal(2, Routes.ElementAt(1).Sequence);
         }
 
         [Fact]

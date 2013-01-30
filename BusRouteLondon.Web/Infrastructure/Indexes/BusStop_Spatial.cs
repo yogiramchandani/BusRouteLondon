@@ -4,9 +4,9 @@ using Raven.Client.Indexes;
 
 namespace BusrRouteLondon.Web.Infrastructure.Indexes
 {
-    public class BusStop_BusStopCode : AbstractIndexCreationTask<BusRoute, BusStop>
+    public class BusStop_Spatial : AbstractIndexCreationTask<BusRoute, BusStop>
     {
-        public BusStop_BusStopCode()
+        public BusStop_Spatial()
         {
             Map = busRoutes => from busRoute in busRoutes
                                select new

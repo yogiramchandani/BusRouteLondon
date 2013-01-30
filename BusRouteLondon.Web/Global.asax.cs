@@ -69,7 +69,7 @@ namespace BusRouteLondon.Web
         {
             try
             {
-                IndexCreation.CreateIndexes(typeof(BusStop_BusStopCode).Assembly, store);
+                IndexCreation.CreateIndexes(typeof(BusStop_Spatial).Assembly, store);
             }
             catch (WebException e)
             {

@@ -19,10 +19,16 @@
         
         var radiusMeter = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
         var radiusMiles = radiusMeter * 0.000621371192;
-
+        
+        showCoordinateDetails(center, radiusMiles);
+    }
+    
+    function showCoordinateDetails(center, radiusMiles) {
         $('#latLngDiv').html(
-            "Center (Lat: " + center.lat() + " Lng: " + center.lng() + ") " + 
+            "Center (Lat: " + center.lat() + " Lng: " + center.lng() + ") " +
             "Radius in miles (" + radiusMiles + ")");
+        
+        $('#radius-left').prepend($('<li></li>').html(radiusMiles));
     }
     
     function loadScript() {
@@ -30,10 +36,6 @@
         script.type = "text/javascript";
         script.src = "http://maps.googleapis.com/maps/api/js?key=AIzaSyDelN_I3DeYdJrMUp43bMxOOpgcDwCjy9o&sensor=false&callback=initialize&libraries=geometry";
         document.body.appendChild(script);
-    }
-    
-    function approxDistanceCalculator() {
-        
     }
 
     window.onload = loadScript;
@@ -56,14 +58,10 @@
         </div>
     </section>
     <section class="content-wrapper main-content clear-fix">
-        Drag and zoom using your mouse. Current map boundary: <div id="latLngDiv">?</div>
+        Drag and zoom using your mouse. Current map boundary: <div id="latLngDiv">N/A</div>
         <br/>
         <section class="float-left">
-            <ul>
-                <li>l1 asdas londgewfsd sdf sd</li>
-                <li>l2 asdas londgewfsd sdf sd</li>
-                <li>l3 asdas londgewfsd sdf sd</li>    
-            </ul>
+            <ul id="radius-left"></ul>
         </section>
         <div id="map_canvas" style="height:500px"></div>
     </section>

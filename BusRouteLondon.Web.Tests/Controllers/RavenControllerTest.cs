@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Web;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Routing;
 using System.Web.Mvc;
 using System.Web.Routing;
 using BusRouteLondon.Migration;
@@ -31,13 +35,13 @@ namespace BusRouteLondon.Web.Tests.Controllers
 
             documentStore.RegisterListener(new NoStaleQueriesAllowed());
             documentStore.Initialize();
-            IndexCreation.CreateIndexes(typeof(BusStop_BusStopCode).Assembly, documentStore);
+            IndexCreation.CreateIndexes(typeof(BusStop_Spatial).Assembly, documentStore);
 
             Controller = new TController { RavenSession = documentStore.OpenSession() };
 
-            var httpContext = Substitute.For<HttpContextBase>();
-            httpContext.Response.Returns(Substitute.For<HttpResponseBase>());
-            Controller.ControllerContext = new ControllerContext(httpContext, new RouteData(), Controller);
+            var httpContext = Substitute.For<HttpConfiguration>();
+            var httpRoute = Substitute.For<HttpRouteData>(Substitute.For<IHttpRoute>());
+            Controller.ControllerContext = new HttpControllerContext(httpContext, httpRoute, new HttpRequestMessage());
         }
 
         protected void SetupData(Action<IDocumentSession> action)
