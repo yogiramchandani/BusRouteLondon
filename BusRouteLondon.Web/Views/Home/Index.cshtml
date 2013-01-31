@@ -33,14 +33,14 @@
     function getVisibleBusStops(center, radiusMiles) {
         jQuery.support.cors = true;
         $.ajax({
-            url: 'http://localhost:9759/api/BusStop/'+ center.lat() +'/' + center.lng + '/' + radiusMiles,
+            url: 'http://localhost:9759/api/BusStop/'+ center.lat() +'/' + center.lng() + '/' + radiusMiles,
             type: 'GET',
             dataType: "application/json",
             success: function (data) {
                 updateBusStopList(data);
             },
             error: function (data) {
-                alert(data);
+                alert(data.responseText);
             }
         });
     }
