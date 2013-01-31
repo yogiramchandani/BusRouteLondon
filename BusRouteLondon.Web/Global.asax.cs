@@ -18,12 +18,15 @@ namespace BusRouteLondon.Web
     {
         private static readonly Lazy<IDocumentStore> _documentStore =
             new Lazy<IDocumentStore>(() =>
-                                         {
-                                             var docStore = new DocumentStore { ConnectionStringName = "RavenDB" };
-                                             docStore.Initialize();
-                                             TryCreatingIndexesOrRedirectToErrorPage(docStore);
-                                             return docStore;
-                                         });
+                {
+                    var docStore = new DocumentStore
+                        {
+                            ConnectionStringName = "RavenDB",
+                            DefaultDatabase = "BusRouteLondonDB"
+                        };
+                    docStore.Initialize();
+                    return docStore;
+                });
 
         public static IDocumentStore DocumentStore
         {
@@ -32,8 +35,8 @@ namespace BusRouteLondon.Web
 
         protected void Application_Start()
         {
+            TryCreatingIndexesOrRedirectToErrorPage(DocumentStore);
             AreaRegistration.RegisterAllAreas();
-
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RavenController.DocumentStore = DocumentStore;
@@ -45,7 +48,7 @@ namespace BusRouteLondon.Web
         {
             BeginRequest += (sender, args) =>
                                 {
-                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = RavenController.DocumentStore.OpenSession("BusRouteLondonDB");
+                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = RavenController.DocumentStore.OpenSession();
                                 };
             EndRequest += (sender, args) =>
                               {

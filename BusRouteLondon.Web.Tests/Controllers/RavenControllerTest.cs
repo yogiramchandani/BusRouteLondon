@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
-using System.Web.Mvc;
-using System.Web.Routing;
 using BusRouteLondon.Migration;
 using BusrRouteLondon.Web.Controllers;
 using BusrRouteLondon.Web.Infrastructure.Indexes;
@@ -29,8 +26,8 @@ namespace BusRouteLondon.Web.Tests.Controllers
             NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8081);
             documentStore = new EmbeddableDocumentStore
                 {
-                    RunInMemory = true,
-                    UseEmbeddedHttpServer = true
+                    //RunInMemory = true,
+                    UseEmbeddedHttpServer = true,
                 };
 
             documentStore.RegisterListener(new NoStaleQueriesAllowed());

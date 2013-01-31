@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BusRouteLondon.Web;
-using Ploeh.AutoFixture;
 using Xunit;
 
 namespace BusRouteLondon.Migration
@@ -63,9 +62,8 @@ namespace BusRouteLondon.Migration
             {
                 if (_routes == null)
                 {
-                    var fixture = new Fixture();
-                    var sut = fixture.CreateAnonymous<BusRouteCSVParser>();
-                    var filename = "testfile.csv";
+                    var sut = new BusRouteCSVParser();
+                    const string filename = "testfile.csv";
                     _routes = sut.Parse(filename);
                 }
                 return _routes;

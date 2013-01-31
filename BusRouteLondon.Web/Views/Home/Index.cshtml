@@ -21,14 +21,35 @@
         var radiusMiles = radiusMeter * 0.000621371192;
         
         showCoordinateDetails(center, radiusMiles);
+        getVisibleBusStops(center, radiusMiles);
     }
     
     function showCoordinateDetails(center, radiusMiles) {
         $('#latLngDiv').html(
             "Center (Lat: " + center.lat() + " Lng: " + center.lng() + ") " +
             "Radius in miles (" + radiusMiles + ")");
-        
-        $('#radius-left').prepend($('<li></li>').html(radiusMiles));
+    }
+
+    function getVisibleBusStops(center, radiusMiles) {
+        jQuery.support.cors = true;
+        $.ajax({
+            url: 'http://localhost:9759/api/BusStop/'+ center.lat() +'/' + center.lng + '/' + radiusMiles,
+            type: 'GET',
+            dataType: "application/json",
+            success: function (data) {
+                updateBusStopList(data);
+            },
+            error: function (data) {
+                alert(data);
+            }
+        });
+    }
+    
+    function updateBusStopList(data) {
+        var ul = $('#radius-left');
+        ul.clear();
+        for (var i in data)
+            ul.append($('<li></li>').html(data[i].BusStopName));
     }
     
     function loadScript() {
