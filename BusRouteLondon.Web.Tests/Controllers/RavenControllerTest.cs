@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
-using BusRouteLondon.Migration;
+﻿using BusRouteLondon.Migration;
 using BusrRouteLondon.Web.Controllers;
 using BusrRouteLondon.Web.Infrastructure.Indexes;
 using NSubstitute;
@@ -12,7 +6,12 @@ using Raven.Client;
 using Raven.Client.Embedded;
 using Raven.Client.Indexes;
 using Raven.Client.Listeners;
-using Raven.Database.Server;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Routing;
 
 namespace BusRouteLondon.Web.Tests.Controllers
 {
@@ -23,11 +22,11 @@ namespace BusRouteLondon.Web.Tests.Controllers
 
         protected RavenControllerTest()
         {
-            NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8081);
+            //NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8081);
             documentStore = new EmbeddableDocumentStore
                 {
-                    //RunInMemory = true,
-                    UseEmbeddedHttpServer = true,
+                    RunInMemory = true,
+                    //UseEmbeddedHttpServer = true,
                 };
 
             documentStore.RegisterListener(new NoStaleQueriesAllowed());

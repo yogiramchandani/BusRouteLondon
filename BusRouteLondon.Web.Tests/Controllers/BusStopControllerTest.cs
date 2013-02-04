@@ -22,11 +22,12 @@ namespace BusRouteLondon.Web.Tests.Controllers
             var radius = 1.6757531522774072;
             
             // Act
-            IEnumerable<BusStop> result = Controller.Get(lat: lat, lng: lng, radius: radius);
-            result.ToList();
+            var result = Controller.Get(lat: lat, lng: lng, radius: radius);
+            result.Stops.ToList();
 
             // Assert
-            Assert.Equal(9, result.Count());
+            Assert.Equal(9, result.Stops.Count());
+            Assert.Equal(9, result.TotalCount);
         }
     }
 }

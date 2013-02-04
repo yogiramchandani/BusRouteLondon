@@ -1,55 +1,100 @@
-﻿
+﻿@Scripts.Render("~/bundles/backbone")
 <script type="text/javascript">
+
+    TFL = {
+        init: function() {
+            new TFL.MapSectionView({ el: "#map_canvas" });
+        }
+    };
+
+    TFL.BusRoute = Backbone.Model.extend({});
+
+    TFL.BusRoutes = Backbone.Collection.extend({
+        model: TFL.BusRoute,
+        baseurl: '/api/BusStop/',
+        initialize: function (models, lat, lng, radius) {
+            var self = this;
+            self.url = self.baseurl + lat + '/' + lng + '/' + radius;
+            self.fetch({
+                success: function(model, response) {
+                    self.models = response.Stops;
+                    self.totalCount = response.TotalCount;
+                }
+            });
+        }
+    });
+    
+    TFL.MapSectionView = Backbone.View.extend({
+        initialize: function () {
+            this.render();
+        },
+
+        render: function () {
+            var mapOptions = {
+                center: new google.maps.LatLng(51.515, -0.141),
+                maxZoom: 18,
+                minZoom: 13,
+                zoom: 14,
+                scaleControl: true,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            // 
+            var map = new google.maps.Map(this.el, mapOptions);
+            var self = this;
+            google.maps.event.addListener(map, 'dragend', function () { self.tilesLoaded(map); });
+            google.maps.event.addListener(map, 'tilesloaded', function () { self.tilesLoaded(map); });
+            return this;
+        },
+        
+        tilesLoaded : function(map){
+            var bounds = map.getBounds();
+            var center = bounds.getCenter();
+            var ne = bounds.getNorthEast();
+
+            var radiusMeter = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
+            var radiusMiles = radiusMeter * 0.000621371192;
+
+            var routes = new TFL.BusRoutes({}, center.lat(), center.lng(), radiusMiles);
+            updateBusStopList(routes.models, map);
+        },
+     
+        loadVisibleStops: function(map, center, radiusMiles) {
+            jQuery.support.cors = true;
+            $.ajax({
+                url: 'http://localhost:9759/api/BusStop/' + center.lat() + '/' + center.lng() + '/' + radiusMiles,
+                type: 'GET',
+                dataType: "json",
+                success: function(data) {
+                    updateBusStopList(data, map);
+                },
+                error: function(data) {
+                    // mapLoadError
+                    // alert(data.responseText);
+                }
+            });
+        }
+    });
+    
     function initialize() {
-        var mapOptions = {
-            center: new google.maps.LatLng(51.515, -0.141),
-            zoom: 14,
-            scaleControl: true,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
-        };
-        var map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-        google.maps.event.addListener(map, 'dragend', function () { mapDragEnd(map); });
-        google.maps.event.addListener(map, 'tilesloaded', function () { mapDragEnd(map); });
+        TFL.init();
     }
 
-    function mapDragEnd(map) {
-        var bounds = map.getBounds();
-        var center = bounds.getCenter();
-        var ne = bounds.getNorthEast();
-        
-        var radiusMeter = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
-        var radiusMiles = radiusMeter * 0.000621371192;
-        
-        showCoordinateDetails(center, radiusMiles);
-        getVisibleBusStops(center, radiusMiles);
-    }
-    
-    function showCoordinateDetails(center, radiusMiles) {
-        $('#latLngDiv').html(
-            "Center (Lat: " + center.lat() + " Lng: " + center.lng() + ") " +
-            "Radius in miles (" + radiusMiles + ")");
-    }
-
-    function getVisibleBusStops(center, radiusMiles) {
-        jQuery.support.cors = true;
-        $.ajax({
-            url: 'http://localhost:9759/api/BusStop/'+ center.lat() +'/' + center.lng() + '/' + radiusMiles,
-            type: 'GET',
-            dataType: "application/json",
-            success: function (data) {
-                updateBusStopList(data);
-            },
-            error: function (data) {
-                alert(data.responseText);
-            }
-        });
-    }
-    
-    function updateBusStopList(data) {
-        var ul = $('#radius-left');
-        ul.clear();
-        for (var i in data)
-            ul.append($('<li></li>').html(data[i].BusStopName));
+    function updateBusStopList(data, map) {
+        // var ul = $('#radius-left');
+        // ul.empty();
+        for (var i in data) {
+            var stopCircleOptions = {
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.8,
+                strokeWeight: 1,
+                fillColor: "#FF0000",
+                fillOpacity: 0.35,
+                map: map,
+                center: new google.maps.LatLng(data.Stops[i].Latitude, data.Stops[i].Longitude),
+                radius: 8
+            };
+            busStops = new google.maps.Circle(stopCircleOptions);
+        }
     }
     
     function loadScript() {
@@ -79,7 +124,8 @@
         </div>
     </section>
     <section class="content-wrapper main-content clear-fix">
-        Drag and zoom using your mouse. Current map boundary: <div id="latLngDiv">N/A</div>
+        Drag and zoom using your mouse.
+        <div id="mapLoadError"></div>
         <br/>
         <section class="float-left">
             <ul id="radius-left"></ul>

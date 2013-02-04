@@ -21,6 +21,10 @@ namespace BusRouteLondon.Web
             // ready for production, use the build tool at http://modernizr.com to pick only the tests you need.
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                         "~/Scripts/modernizr-*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/backbone").Include(
+                        "~/Scripts/underscore*",
+                        "~/Scripts/backbone*"));
             
             bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
 

@@ -9,9 +9,8 @@
         
     </head>
     <body>
-        @RenderBody()
-
         @Scripts.Render("~/bundles/jquery")
         @RenderSection("scripts", required: false)
+        @RenderBody()
     </body>
 </html>

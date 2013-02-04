@@ -9,10 +9,18 @@ namespace BusRouteLondon.Web.Controllers
 {
     public class BusStopController : RavenController
     {
-        public IEnumerable<BusStop> Get(double lat, double lng, double radius)
+        public BusStopWithCount Get(double lat, double lng, double radius)
         {
-            IDocumentQuery<BusStop> stops = RavenSession.Advanced.LuceneQuery<BusStop, BusStop_Spatial>().WithinRadiusOf(radius: radius, latitude: lat, longitude: lng);
-            return stops;
+            RavenQueryStatistics stats;
+            IDocumentQuery<BusStop> stops = RavenSession.Advanced.LuceneQuery<BusStop, BusStop_Spatial>().WithinRadiusOf(radius: radius, latitude: lat, longitude: lng).Statistics(out stats);
+            
+            return new BusStopWithCount{Stops = stops.ToList(), TotalCount = stats.TotalResults};
+        }
+
+        public class BusStopWithCount
+        {
+            public List<BusStop> Stops { get; set; }
+            public int TotalCount { get; set; }
         }
     }
 }
