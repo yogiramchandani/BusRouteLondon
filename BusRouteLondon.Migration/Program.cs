@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BusRouteLondon.Web;
+using BusrRouteLondon.Web.Migration;
 using Raven.Client;
 using Raven.Client.Document;
 
@@ -20,14 +21,8 @@ namespace BusRouteLondon.Migration
 
         private static void MigrateBusRoute()
         {
-            Console.WriteLine("Read File and parse bus routes.");
-
             var filename = "BusRoute.csv";
-            var fileParser = new BusRouteCSVParser();
-            List<BusRoute> routes = fileParser.Parse(filename);
-
-            Console.WriteLine("Successfully read file {0}", filename);
-            Console.WriteLine("Updating OSGB36 to WGS84.");
+            List<BusRoute> routes = ConsoleParser.For(new BusRouteCSVParser()).Parse(filename);
             
             var converter = new OSGB36ToWGS84();
             converter.ConvertRoutes(routes);
@@ -36,15 +31,14 @@ namespace BusRouteLondon.Migration
 
             Console.WriteLine("Successfully saved {0} routes.", routes.Count);
         }
-        
+
         private static void RavenDocumentStoreSessionOperation(Action<IDocumentSession> action)
         {
             using (var documentStore = new DocumentStore {ConnectionStringName = "RavenDB", DefaultDatabase = "BusRouteLondonDB"})
             {
                 documentStore.Initialize();
                 
-                documentStore.Conventions.RegisterIdConvention<BusRoute>(
-                    (dbName, command, route) => string.Format("busroutes/{0}-{1}-{2}", route.Route, route.Run, route.Sequence));
+                
                 using (var session = documentStore.OpenSession())
                 {
                     action(session);

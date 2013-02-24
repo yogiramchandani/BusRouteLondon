@@ -1,6 +1,6 @@
 ﻿using System.Web.Mvc;
 
-namespace BusRouteLondon.Web
+namespace BusrRouteLondon.Web.App_Start
 {
     public class FilterConfig
     {

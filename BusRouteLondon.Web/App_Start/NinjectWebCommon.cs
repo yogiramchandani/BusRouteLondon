@@ -1,25 +1,26 @@
-/*
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Dependencies;
+using System.Web.Mvc;
+using BusRouteLondon.Web;
+using BusrRouteLondon.Web.App_Start;
+using BusrRouteLondon.Web.Migration;
 using Ninject.Activation;
 using Ninject.Parameters;
 using Ninject.Syntax;
+using System;
+using System.Web;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
+using Ninject;
+using Ninject.Web.Common;
+using Raven.Client;
 
-[assembly: WebActivator.PreApplicationStartMethod(typeof(BusRouteLondon.App_Start.NinjectWebCommon), "Start")]
-[assembly: WebActivator.ApplicationShutdownMethodAttribute(typeof(BusRouteLondon.App_Start.NinjectWebCommon), "Stop")]
+[assembly: WebActivator.PreApplicationStartMethod(typeof(NinjectWebCommon), "Start")]
+[assembly: WebActivator.ApplicationShutdownMethodAttribute(typeof(NinjectWebCommon), "Stop")]
 
-namespace BusRouteLondon.App_Start
+namespace BusrRouteLondon.Web.App_Start
 {
-    using System;
-    using System.Web;
-
-    using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-
-    using Ninject;
-    using Ninject.Web.Common;
-
     public static class NinjectWebCommon 
     {
         private static readonly Bootstrapper bootstrapper = new Bootstrapper();
@@ -53,7 +54,11 @@ namespace BusRouteLondon.App_Start
             kernel.Bind<IHttpModule>().To<HttpApplicationInitializationHttpModule>();
             
             RegisterServices(kernel);
-            GlobalConfiguration.Configuration.DependencyResolver = new NinjectResolver(kernel);
+            var resolver = new NinjectResolver(kernel);
+            // for ASP.NET controllers
+            GlobalConfiguration.Configuration.DependencyResolver = resolver;
+            // for Web API controllers
+            DependencyResolver.SetResolver(resolver);
 
             return kernel;
         }
@@ -64,10 +69,22 @@ namespace BusRouteLondon.App_Start
         /// <param name="kernel">The kernel.</param>
         private static void RegisterServices(IKernel kernel)
         {
+            kernel
+                .Bind<ICSVParser<BusRoute>>()
+                .To(typeof(BusRouteCSVParser))
+                .InSingletonScope();
+            kernel
+                .Bind<ISpatialCoordinateConverter>()
+                .To(typeof(OSGB36ToWGS84))
+                .InSingletonScope();
+            kernel
+                .Bind<IDocumentStore>()
+                .ToConstant(new RavenDbConfig().GetRavenDBStore())
+                .InSingletonScope();
         }        
     }
 
-    public class NinjectResolver : NinjectScope, IDependencyResolver
+    public class NinjectResolver : NinjectScope, System.Web.Http.Dependencies.IDependencyResolver, System.Web.Mvc.IDependencyResolver
     {
         private IKernel _kernel;
         public NinjectResolver(IKernel kernel)
@@ -110,4 +127,3 @@ namespace BusRouteLondon.App_Start
         }
     }
 }
-*/

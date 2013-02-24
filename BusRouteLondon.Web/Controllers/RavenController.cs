@@ -10,8 +10,6 @@ namespace BusrRouteLondon.Web.Controllers
     {
         public static string CurrentRequestRavenSession = "CurrentRequestRavenSession";
 
-        public static IDocumentStore DocumentStore { get; set; }
-
         public IDocumentSession RavenSession { get; set; }
 
         protected override void Initialize(HttpControllerContext filterContext)

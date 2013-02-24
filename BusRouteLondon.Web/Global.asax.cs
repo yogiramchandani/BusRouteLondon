@@ -1,4 +1,9 @@
-﻿using System;
+﻿using BusrRouteLondon.Web.App_Start;
+using BusrRouteLondon.Web.Controllers;
+using BusrRouteLondon.Web.Infrastructure.Indexes;
+using Raven.Client;
+using Raven.Client.Document;
+using Raven.Client.Indexes;
 using System.Net;
 using System.Net.Sockets;
 using System.Web;
@@ -6,49 +11,31 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using BusrRouteLondon.Web.Controllers;
-using BusrRouteLondon.Web.Infrastructure.Indexes;
-using Raven.Client;
-using Raven.Client.Document;
-using Raven.Client.Indexes;
 
 namespace BusRouteLondon.Web
 {
     public class WebApiApplication : HttpApplication
     {
-        private static readonly Lazy<IDocumentStore> _documentStore =
-            new Lazy<IDocumentStore>(() =>
-                {
-                    var docStore = new DocumentStore
-                        {
-                            ConnectionStringName = "RavenDB",
-                            DefaultDatabase = "BusRouteLondonDB"
-                        };
-                    docStore.Initialize();
-                    return docStore;
-                });
-
-        public static IDocumentStore DocumentStore
+        private static IDocumentStore DocumentStore
         {
-            get { return _documentStore.Value; }
+            get { return DependencyResolver.Current.GetService<IDocumentStore>(); }
         }
 
         protected void Application_Start()
         {
-            TryCreatingIndexesOrRedirectToErrorPage(DocumentStore);
             AreaRegistration.RegisterAllAreas();
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
-            RavenController.DocumentStore = DocumentStore;
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            TryCreatingIndexesOrRedirectToErrorPage(DocumentStore);
         }
 
         public WebApiApplication()
         {
             BeginRequest += (sender, args) =>
                                 {
-                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = RavenController.DocumentStore.OpenSession();
+                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = DocumentStore.OpenSession();
                                 };
             EndRequest += (sender, args) =>
                               {

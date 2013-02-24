@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System.Net.Http;
+using System.Web.Http;
+using System.Web.Http.Routing;
 
 namespace BusRouteLondon.Web
 {
@@ -10,6 +12,12 @@ namespace BusRouteLondon.Web
                 name: "BusStopApi",
                 routeTemplate: "api/{controller}/{lat}/{lng}/{radius}"
             );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApiGet",
+                routeTemplate: "Api/{controller}",
+                defaults: new { action = "Get" },
+                constraints: new { httpMethod = new HttpMethodConstraint(HttpMethod.Get) });
         }
     }
 }

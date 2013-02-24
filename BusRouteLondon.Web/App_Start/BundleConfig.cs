@@ -25,6 +25,9 @@ namespace BusRouteLondon.Web
             bundles.Add(new ScriptBundle("~/bundles/backbone").Include(
                         "~/Scripts/underscore*",
                         "~/Scripts/backbone*"));
+
+            bundles.Add(new ScriptBundle("~/bundles/tfl").Include(
+                        "~/Scripts/tfl*"));
             
             bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/site.css"));
 
