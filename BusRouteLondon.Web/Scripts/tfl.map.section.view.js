@@ -1,27 +1,28 @@
 ﻿TFL = {
-        init: function() {
-            new TFL.MapSectionView({ el: "#map_canvas" });
-        }
-    };
-
-    TFL.BusRoute = Backbone.Model.extend({});
+    init: function() {
+        var routes = new TFL.BusRoutes();
+        var view = new TFL.MapSectionView({ el: "#map_canvas", collection: routes });
+    }
+};
 
     TFL.BusRoutes = Backbone.Collection.extend({
-        model: TFL.BusRoute,
         baseurl: '/api/BusStop/',
-        initialize: function (models, lat, lng, radius) {
+        initialize: function (models) {
             var self = this;
-            self.url = self.baseurl + lat + '/' + lng + '/' + radius;
-            self.fetch({
-                success: function(model, response) {
-                    self.models = response.Stops;
-                    self.totalCount = response.TotalCount;
-                }
-            });
+            this._meta = {};
+            return self;
+        },
+        search: function(lat, lng, radius) {
+            this.url = this.baseurl + lat + '/' + lng + '/' + radius;
+        },
+        parse: function (response) {
+            this._meta["totalCount"] = response.TotalCount;
+            return response.Stops;
         }
     });
-    
+
     TFL.MapSectionView = Backbone.View.extend({
+        
         initialize: function () {
             this.render();
         },
@@ -50,48 +51,27 @@
 
             var radiusMeter = google.maps.geometry.spherical.computeDistanceBetween(center, ne);
             var radiusMiles = radiusMeter * 0.000621371192;
+            this.collection.search(center.lat(), center.lng(), radiusMiles);
+            this.collection.fetch();
+            _.each(this.collection.models, function(stop){
+                var stopCircleOptions = {
+                    strokeColor: "#FF0000",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 1,
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.35,
+                    map: map,
+                    center: new google.maps.LatLng(stop.get("Latitude"), stop.get("Longitude")),
+                    radius: 8
+                };
+                busStops = new google.maps.Circle(stopCircleOptions);
+            }, this);
 
-            var routes = new TFL.BusRoutes({}, center.lat(), center.lng(), radiusMiles);
-            updateBusStopList(routes.models, map);
-        },
-     
-        loadVisibleStops: function(map, center, radiusMiles) {
-            jQuery.support.cors = true;
-            $.ajax({
-                url: 'http://localhost:9759/api/BusStop/' + center.lat() + '/' + center.lng() + '/' + radiusMiles,
-                type: 'GET',
-                dataType: "json",
-                success: function(data) {
-                    updateBusStopList(data, map);
-                },
-                error: function(data) {
-                    // mapLoadError
-                    // alert(data.responseText);
-                }
-            });
         }
     });
     
     function initialize() {
         TFL.init();
-    }
-
-    function updateBusStopList(data, map) {
-        // var ul = $('#radius-left');
-        // ul.empty();
-        for (var i in data) {
-            var stopCircleOptions = {
-                strokeColor: "#FF0000",
-                strokeOpacity: 0.8,
-                strokeWeight: 1,
-                fillColor: "#FF0000",
-                fillOpacity: 0.35,
-                map: map,
-                center: new google.maps.LatLng(data.Stops[i].Latitude, data.Stops[i].Longitude),
-                radius: 8
-            };
-            busStops = new google.maps.Circle(stopCircleOptions);
-        }
     }
     
     function loadScript() {

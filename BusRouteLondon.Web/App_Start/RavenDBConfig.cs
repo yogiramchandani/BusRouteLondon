@@ -23,7 +23,7 @@ namespace BusrRouteLondon.Web.App_Start
             }
             else
             {
-                NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8085);
+                NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8080);
                 docStore = new EmbeddableDocumentStore
                     {
                         //RunInMemory = true,

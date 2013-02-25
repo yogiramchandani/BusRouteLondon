@@ -12,6 +12,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
                                select new
                                           {
                                               _ = (object)null,
+                                              busRoute.Stop.Id,
                                               busRoute.Stop.BusStopCode,
                                               busRoute.Stop.BusStopName,
                                               busRoute.Stop.Latitude,
@@ -23,6 +24,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
                                  group busStop by new
                                                       {
                                                           _ = (object) null,
+                                                          busStop.Id,
                                                           busStop.BusStopCode,
                                                           busStop.BusStopName,
                                                           busStop.Latitude,
@@ -34,6 +36,7 @@ namespace BusrRouteLondon.Web.Infrastructure.Indexes
                                  select new
                                             {
                                                 _ = SpatialIndex.Generate(g.Key.Latitude, g.Key.Longitude),
+                                                g.Key.Id,
                                                 g.Key.BusStopCode,
                                                 g.Key.BusStopName,
                                                 g.Key.Latitude,
