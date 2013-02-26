@@ -23,12 +23,12 @@ namespace BusrRouteLondon.Web.App_Start
             }
             else
             {
-                NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8080);
+                //NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(8080);
                 docStore = new EmbeddableDocumentStore
                     {
                         //RunInMemory = true,
                         DataDirectory = "~/App_Data/Raven",
-                        UseEmbeddedHttpServer = true
+                        //UseEmbeddedHttpServer = true
                     };
             }
 
