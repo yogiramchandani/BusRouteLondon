@@ -1,11 +1,10 @@
-﻿using BusRouteLondon.Web;
+﻿using BusRouteLondon.Web.Models;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
 using System.Configuration;
-using Raven.Database.Server;
 
-namespace BusrRouteLondon.Web.App_Start
+namespace BusRouteLondon.Web.App_Start
 {
     public class RavenDbConfig
     {

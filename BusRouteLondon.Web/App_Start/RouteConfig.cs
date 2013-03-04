@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace BusRouteLondon.Web
+namespace BusRouteLondon.Web.App_Start
 {
     public class RouteConfig
     {

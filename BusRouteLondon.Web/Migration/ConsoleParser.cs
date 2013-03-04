@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BusrRouteLondon.Web.Migration
+namespace BusRouteLondon.Web.Migration
 {
     // Console logging decorator
     public sealed class ConsoleParser<T> : ICSVParser<T>

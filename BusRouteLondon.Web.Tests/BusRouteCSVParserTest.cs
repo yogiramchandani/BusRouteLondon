@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BusrRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Models;
 using Xunit;
 
 namespace BusRouteLondon.Web.Tests

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using BusRouteLondon.Web;
+using BusRouteLondon.Web.Models;
 using Microsoft.VisualBasic.FileIO;
 
-namespace BusrRouteLondon.Web.Migration
+namespace BusRouteLondon.Web.Migration
 {
     public class BusRouteCSVParser : ICSVParser<BusRoute>
     {

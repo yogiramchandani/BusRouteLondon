@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using BusRouteLondon.Web;
-using BusrRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Models;
 using Raven.Client;
 using Raven.Client.Document;
 

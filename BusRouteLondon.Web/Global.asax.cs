@@ -1,8 +1,6 @@
-﻿using BusrRouteLondon.Web.App_Start;
-using BusrRouteLondon.Web.Controllers;
-using BusrRouteLondon.Web.Infrastructure.Indexes;
+﻿using BusRouteLondon.Web.App_Start;
+using BusRouteLondon.Web.Infrastructure.Indexes;
 using Raven.Client;
-using Raven.Client.Document;
 using Raven.Client.Indexes;
 using System.Net;
 using System.Net.Sockets;
@@ -26,34 +24,11 @@ namespace BusRouteLondon.Web
             AreaRegistration.RegisterAllAreas();
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            HttpFilterConfig.RegisterHttpFilters(GlobalConfiguration.Configuration.Filters, DocumentStore);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             TryCreatingIndexesOrRedirectToErrorPage(DocumentStore);
         }
-
-        public WebApiApplication()
-        {
-            BeginRequest += (sender, args) =>
-                                {
-                                    HttpContext.Current.Items[RavenController.CurrentRequestRavenSession] = DocumentStore.OpenSession();
-                                };
-            EndRequest += (sender, args) =>
-                              {
-                                  using (var session = (IDocumentSession) HttpContext.Current.Items[RavenController.CurrentRequestRavenSession])
-                                  {
-                                      if (session == null)
-                                      {
-                                          return;
-                                      }
-                                      if (Server.GetLastError() != null)
-                                      {
-                                          return;
-                                      }
-                                      session.SaveChanges();
-                                  }
-                              };
-        }
-
 
         private static void TryCreatingIndexesOrRedirectToErrorPage(IDocumentStore store)
         {

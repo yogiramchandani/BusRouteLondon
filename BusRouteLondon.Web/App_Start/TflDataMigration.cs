@@ -1,14 +1,14 @@
-﻿
-using BusRouteLondon.Web;
-using BusrRouteLondon.Web.Migration;
+﻿using BusRouteLondon.Web.App_Start;
+using BusRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Models;
 using Raven.Client;
 using System;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-[assembly: WebActivator.PostApplicationStartMethod(typeof(BusrRouteLondon.Web.App_Start.TflDataMigration), "Initialise")]
-namespace BusrRouteLondon.Web.App_Start
+[assembly: WebActivator.PostApplicationStartMethod(typeof(TflDataMigration), "Initialise")]
+namespace BusRouteLondon.Web.App_Start
 {
     public static class TflDataMigration
     {

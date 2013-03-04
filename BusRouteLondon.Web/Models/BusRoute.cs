@@ -1,4 +1,4 @@
-namespace BusRouteLondon.Web
+namespace BusRouteLondon.Web.Models
 {
     public class BusRoute
     {

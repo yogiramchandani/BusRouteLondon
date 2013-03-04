@@ -2,7 +2,7 @@
 using System.Web.Http;
 using System.Web.Http.Routing;
 
-namespace BusRouteLondon.Web
+namespace BusRouteLondon.Web.App_Start
 {
     public static class WebApiConfig
     {

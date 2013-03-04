@@ -1,7 +1,7 @@
-﻿using BusRouteLondon.Migration;
-using BusrRouteLondon.Web.Controllers;
-using BusrRouteLondon.Web.Infrastructure.Indexes;
-using BusrRouteLondon.Web.Migration;
+﻿using BusRouteLondon.Web.Controllers;
+using BusRouteLondon.Web.Infrastructure.Indexes;
+using BusRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Models;
 using NSubstitute;
 using Raven.Client;
 using Raven.Client.Embedded;

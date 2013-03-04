@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using BusRouteLondon.Web;
+using BusRouteLondon.Web.Models;
 using Raven.Client.Indexes;
 
-namespace BusrRouteLondon.Web.Infrastructure.Indexes
+namespace BusRouteLondon.Web.Infrastructure.Indexes
 {
     public class BusStop_Spatial : AbstractIndexCreationTask<BusRoute, BusStop>
     {

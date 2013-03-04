@@ -3,9 +3,9 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Dependencies;
 using System.Web.Mvc;
-using BusRouteLondon.Web;
-using BusrRouteLondon.Web.App_Start;
-using BusrRouteLondon.Web.Migration;
+using BusRouteLondon.Web.App_Start;
+using BusRouteLondon.Web.Migration;
+using BusRouteLondon.Web.Models;
 using Ninject.Activation;
 using Ninject.Parameters;
 using Ninject.Syntax;
@@ -19,7 +19,7 @@ using Raven.Client;
 [assembly: WebActivator.PreApplicationStartMethod(typeof(NinjectWebCommon), "Start")]
 [assembly: WebActivator.ApplicationShutdownMethodAttribute(typeof(NinjectWebCommon), "Stop")]
 
-namespace BusrRouteLondon.Web.App_Start
+namespace BusRouteLondon.Web.App_Start
 {
     public static class NinjectWebCommon 
     {

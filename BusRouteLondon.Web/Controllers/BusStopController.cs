@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BusrRouteLondon.Web.Controllers;
-using BusrRouteLondon.Web.Infrastructure.Indexes;
+using BusRouteLondon.Web.Infrastructure.Indexes;
+using BusRouteLondon.Web.Models;
 using Raven.Client;
 
 namespace BusRouteLondon.Web.Controllers

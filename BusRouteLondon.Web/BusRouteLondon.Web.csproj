@@ -11,8 +11,8 @@
     <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BusrRouteLondon.Web</RootNamespace>
-    <AssemblyName>BusrRouteLondon.Web</AssemblyName>
+    <RootNamespace>BusRouteLondon.Web</RootNamespace>
+    <AssemblyName>BusRouteLondon.Web</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
@@ -139,6 +139,7 @@
   <ItemGroup>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\HttpFilterConfig.cs" />
     <Compile Include="App_Start\NinjectWebCommon.cs" />
     <Compile Include="App_Start\RavenDBConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\Filter\RavenSessionManagementAttribute.cs" />
     <Compile Include="Infrastructure\Indexes\BusRoute_Spatial.cs" />
     <Compile Include="Infrastructure\Indexes\BusStop_Spatial.cs" />
     <Compile Include="Migration\BusRouteCSVParser.cs" />

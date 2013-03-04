@@ -1,6 +1,4 @@
 ﻿using System.Web.Mvc;
-using BusrRouteLondon.Web.Migration;
-using Ninject;
 
 namespace BusRouteLondon.Web.Controllers
 {

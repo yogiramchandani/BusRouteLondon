@@ -15,9 +15,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using BusRouteLondon.Web;
+using BusRouteLondon.Web.Models;
 
-namespace BusrRouteLondon.Web.Migration
+namespace BusRouteLondon.Web.Migration
 {
     public class OSGB36ToWGS84 : ISpatialCoordinateConverter
     {

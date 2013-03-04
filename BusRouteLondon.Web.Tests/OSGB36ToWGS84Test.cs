@@ -1,5 +1,4 @@
-﻿
-using BusrRouteLondon.Web.Migration;
+﻿using BusRouteLondon.Web.Migration;
 using Xunit;
 
 namespace BusRouteLondon.Web.Tests

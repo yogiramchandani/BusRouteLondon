@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BusrRouteLondon.Web.Migration
+namespace BusRouteLondon.Web.Migration
 {
     public interface ICSVParser<T>
     {
