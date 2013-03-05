@@ -1,5 +1,5 @@
 # TFL Bus Route using Google maps
-A project to play with RavenDB.
+Playing with RavenDB and Backbone.js.
 
 Mapping the TFL bus route data using Google maps.
 
